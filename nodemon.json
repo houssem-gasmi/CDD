@@ -1,0 +1,6 @@
+{
+  "exec": "node --no-warnings --loader ts-node/esm src/index.ts",
+  "ext": "ts",
+  "watch": ["src"],
+  "ignore": ["node_modules"]
+}
