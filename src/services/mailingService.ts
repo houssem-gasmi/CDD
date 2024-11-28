@@ -5,10 +5,10 @@ export const sendMail = async (subject: string, body: string, email: string) => 
   try {
     // Set up the SMTP transporter using environment variables
     const transporter = nodemailer.createTransport({
-      service: "gmail", // You can use 'gmail' as the service name if you're using Gmail SMTP
+      service: "gmail", 
       auth: {
-        user: process.env.MAIL_USER, // The email you are using for the service (from your .env file)
-        pass: process.env.MAIL_PASSWORD, // The password for your email (from your .env file)
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASSWORD,
       },
     });
 

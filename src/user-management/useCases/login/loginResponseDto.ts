@@ -1,4 +1,4 @@
-import { OdcCollaboratorType } from "../../../models/CddUser.js";
+import { CddUser } from "../../../models/CddUser.js";
 import { Role } from "../../../types/types.js";
 
 export interface LoginResponseDto {
