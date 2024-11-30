@@ -7,7 +7,9 @@ import { sendMail } from "../../../services/mailingService.js";
 import { logger } from "../../../config/loggerSetup.js";
 
 export const generateForgetPasswordLinkController = async (req: Request, res: Response<ResponseResult<null>>) => {
-  if (!req.body.email) {
+  const { email } = req.body;
+  
+  if (!email) {
     return res.status(400).json({
       success: false,
       message: "Email is required",
@@ -16,7 +18,7 @@ export const generateForgetPasswordLinkController = async (req: Request, res: Re
   }
 
   try {
-    const user = await CddUser.findOne({ email: req.body.email });
+    const user = await CddUser.findOne({ email });
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -33,29 +35,29 @@ export const generateForgetPasswordLinkController = async (req: Request, res: Re
     });
 
     try {
-      // send email notification
-      await sendMail("reset password link", "http://localhost:3000/reset-password?resetToken=" + token, user.email);
+      // Send email notification
+      await sendMail("reset password link", `http://localhost:5000/reset-password?resetToken=${token}`, user.email);
       logger.info("Reset password link sent successfully");
     } catch (e) {
       logger.warn("Error sending email notification", e);
-      return {
+      return res.status(500).json({
         success: false,
-        message: "error occured while sending the email, please try again later",
-        status: 404,
-      };
+        message: "Error occurred while sending the email, please try again later",
+        status: 500,
+      });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Reset password link sent successfully , please check your email",
+      message: "Reset password link sent successfully. Please check your email.",
       status: 200,
       data: null,
     });
   } catch (e) {
-    return {
+    return res.status(500).json({
       success: false,
-      message: "error occured while handling the request, please try again later",
-      status: 404,
-    };
+      message: "Error occurred while handling the request. Please try again later.",
+      status: 500,
+    });
   }
 };

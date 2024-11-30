@@ -3,7 +3,7 @@ import { verifyRole } from "../middlewares/verifyRole.js";
 import { verifyToken } from "../middlewares/verifyToken.js";
 import { loginUserController } from "./useCases/login/login.js";
 import { changePasswordController } from "./useCases/changePassword/changePassword.js";
-import { getLoggedInUserController } from "./useCases/getLoggedInUser/getLoggedInUser.js";
+
 
 import { handleForgetPasswordController } from "./useCases/forgetPassword/handleChangePassword.js";
 import { handleAccountStatusController } from "./useCases/handleAccountStatus/handleAccountStatus.js";
@@ -18,10 +18,12 @@ userManagementRouter.post("/login", loginUserController);
 userManagementRouter.put("/change-password", verifyToken, changePasswordController);
 
 userManagementRouter.post("/forget-password/getLink", generateForgetPasswordLinkController);
-userManagementRouter.post("/forget-password/verifyLink", verifyForgetPasswordLinkController);
-userManagementRouter.post("/forget-password/change-password", handleForgetPasswordController);
+userManagementRouter.get("/reset-password", verifyForgetPasswordLinkController);
 
-userManagementRouter.get("/user-profile", verifyToken, getLoggedInUserController);
+// Handle the form submission to reset password
+userManagementRouter.post("/reset-password", handleForgetPasswordController);
+
+
 
 userManagementRouter.put(
   "/handle-Account-Status",

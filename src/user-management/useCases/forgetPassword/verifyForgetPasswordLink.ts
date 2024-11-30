@@ -3,19 +3,18 @@ import { ResponseResult } from "../../../types/types.js";
 import { ResetPasswordToken } from "../../../models/resetPasswordTokenSchema.js";
 
 export const verifyForgetPasswordLinkController = async (req: Request, res: Response<ResponseResult<null>>) => {
-  const token = req.body.token;
+  const token = req.query.resetToken as string;
+  
   if (!token) {
     return res.status(400).json({
       success: false,
-      message: "invalid reset password token",
+      message: "Invalid reset password token",
       status: 400,
     });
   }
 
   try {
-    const resetPasswordToken = await ResetPasswordToken.findOne({
-      token,
-    });
+    const resetPasswordToken = await ResetPasswordToken.findOne({ token });
 
     if (!resetPasswordToken) {
       return res.status(404).json({
@@ -32,10 +31,10 @@ export const verifyForgetPasswordLinkController = async (req: Request, res: Resp
       data: null,
     });
   } catch (e) {
-    return {
+    return res.status(500).json({
       success: false,
-      message: "error occured while handling the request, please try again later",
-      status: 404,
-    };
+      message: "Error occurred while handling the request. Please try again later.",
+      status: 500,
+    });
   }
 };

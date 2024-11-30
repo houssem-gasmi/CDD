@@ -5,33 +5,31 @@ import { CddUser } from "../../../models/CddUser.js";
 import { ResetPasswordToken } from "../../../models/resetPasswordTokenSchema.js";
 
 export const handleForgetPasswordController = async (req: Request, res: Response<ResponseResult<null>>) => {
-  const token = req.query.token;
+  const token = req.query.resetToken as string;
   const { password, confirmPassword } = req.body;
 
   if (!token) {
     return res.status(400).json({
       success: false,
-      message: "invalid reset password token",
+      message: "Invalid reset password token",
       status: 400,
     });
   }
 
-  const resetPasswordToken = await ResetPasswordToken.findOne({
-    token,
-  });
+  const resetPasswordToken = await ResetPasswordToken.findOne({ token });
 
   if (!resetPasswordToken) {
-    return {
+    return res.status(404).json({
       success: false,
       message: "Invalid reset password token",
       status: 404,
-    };
+    });
   }
 
   if (!password || !confirmPassword) {
     return res.status(400).json({
       success: false,
-      message: "password and confirm password are required",
+      message: "Password and confirm password are required",
       status: 400,
     });
   }
@@ -39,28 +37,26 @@ export const handleForgetPasswordController = async (req: Request, res: Response
   if (password !== confirmPassword) {
     return res.status(400).json({
       success: false,
-      message: "password and confirm password are not matching",
+      message: "Password and confirm password do not match",
       status: 400,
     });
   }
 
-  if (password.length < 6 || confirmPassword.length < 6) {
+  if (password.length < 6) {
     return res.status(400).json({
       success: false,
-      message: "password length should be greater than 6",
+      message: "Password length should be greater than 6 characters",
       status: 400,
     });
   }
 
   try {
-    const user = await CddUser.findOne({
-      email: resetPasswordToken.email,
-    });
+    const user = await CddUser.findOne({ email: resetPasswordToken.email });
 
-    if (!user || user.isArchived || !user.isEnabled) {
+    if (!user ) {
       return res.status(404).json({
         success: false,
-        message: "there is no user associated with such email",
+        message: "There is no user associated with this email",
         status: 404,
       });
     }
@@ -76,10 +72,10 @@ export const handleForgetPasswordController = async (req: Request, res: Response
       data: null,
     });
   } catch (e) {
-    return {
+    return res.status(500).json({
       success: false,
-      message: "error occured while handling the request, please try again later",
-      status: 404,
-    };
+      message: "Error occurred while handling the request. Please try again later.",
+      status: 500,
+    });
   }
 };

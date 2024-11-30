@@ -61,7 +61,7 @@ export const registerCddUserController = async (
 
     // Send welcome email
     try {
-      await sendMail("Welcome to CDD", "Welcome to Customer Driven Domain", newUser.email);
+      await sendMail("Welcome to CDD",firstName+ " " +"Welcome to Customer Driven Domain", newUser.email);
       logger.info("Welcome mail sent successfully");
     } catch (emailError) {
       logger.error("Failed to send welcome email", emailError);
