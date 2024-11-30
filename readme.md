@@ -1,28 +1,66 @@
-# Orange Digital Coding
+# CDD - Customer Driven Domain
 
-this repository contains the mongodb data model for the orange digital coding project
+CDD (Customer Driven Domain) is a comprehensive backend system designed to cater to customer-centric services. It focuses on managing users, handling authentication, managing account statuses, and facilitating password resets. The application is designed to be scalable, secure, and efficient for handling user data and interactions.
+## Tech Stack
 
-## Diagrams
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB
+- **Authentication**: JWT (JSON Web Tokens)
+- **Email Service**: SMTP (Gmail integration for sending reset password links)
+- **Error Handling**: Centralized error handler to capture and manage errors.
+- **Rate Limiting**: Custom rate limiter to prevent brute force attacks.
+## Getting Started
 
-- a few diagrams to help understand the model ,all these diagrams
-are in "model/diagrams" folder
-- you can browse "model/json" folder to see the json examples of the data model
+To get a local copy up and running, follow these simple steps:
 
-> install vscode extension "json crack" to view the json files in a better way
+### Prerequisites
 
-## Event Json Example
+Make sure you have the following installed:
 
-- event will keep track of :
-  - event details
-  - participants list
-  - results of the coding tests for each participant
+- Node.js
+- MongoDB (if you're using a local instance)
+- A code editor like VSCode
 
-![Event json example](model/diagrams/Event.jpeg)
+### Installation
 
-## Candidate Test Result Json Example
+1. **Clone the repository:**
 
-- candidate test results represent the result of the coding test for a candidate
-  - it will keep track of the candidate details and the result of the test
-  - results of the tests such as code submissions and test results
+    ```bash
+    git clone https://github.com/houssem-gasmi/CDD.git
+    ```
 
-![Candidate test result json example](model/diagrams/CandidateTestResults.jpeg)
+2. **Navigate to the project directory:**
+
+    ```bash
+    cd CDD
+    ```
+
+3. **Install dependencies:**
+
+    ```bash
+    npm install
+    ```
+
+
+  4. **Open the `.env` file:**
+
+    Open the `.env` file in the root directory of the project (if it doesn't exist, create one) and add the following variables:
+
+    ```plaintext
+    MONGO_URI=<Your MongoDB URI>
+    PORT=5000
+    JWT_SECRET=<Your JWT Secret Key>
+    MAIL_USER=<Your Email Address>
+    MAIL_PASSWORD=<Your Email Password>
+    SMTP_HOST=smtp.gmail.com
+    CORS_ORIGIN=http://localhost:3000
+    ```
+
+    - Replace `<Your MongoDB URI>` with your MongoDB connection string.
+    5. **Run the application:**
+
+    ```bash
+    npm start
+    ```
+
+    This will start the server on port `5000` (or the port you defined in your `.env` file).
