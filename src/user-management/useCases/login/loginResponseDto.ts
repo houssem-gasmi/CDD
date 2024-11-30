@@ -1,6 +1,6 @@
-import { CddUser } from "../../../models/CddUser.js";
 import { Role } from "../../../types/types.js";
 
+// DTO for Login Response
 export interface LoginResponseDto {
   firstName: string;
   lastName: string;

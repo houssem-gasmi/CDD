@@ -1,23 +1,34 @@
 import jwt from "jsonwebtoken";
 import * as bcrypt from "bcrypt";
 import { Request, Response } from "express";
-import { LoginResponseDto } from "./loginResponseDto.js";
-import { ResponseResult, Role } from "../../../types/types.js";
+import { ResponseResult, Role } from "../../../types/types.js"; // Make sure this import is correct
 import { CddUser } from "../../../models/CddUser.js";
 
-const generateToken = (userId: string, role: Role, email: string) => {
-  return jwt.sign(
-    {
-      id: userId,
-      role,
-      email,
-    },
-    process.env.JWT_SECRET as string,
-    { expiresIn: "1d" }
-  );
+// Function to generate JWT token
+const generateToken = (userId: string, role: Role, email: string): string => {
+  try {
+    console.log("Generating JWT for user:", userId, role, email); // Debugging info
+
+    return jwt.sign(
+      {
+        id: userId,
+        role,
+        email,
+      },
+      process.env.JWT_SECRET as string, // Ensure this secret key is in .env file
+      { expiresIn: "1d" } // Token expires in 1 day
+    );
+  } catch (error) {
+    console.error("Error generating JWT:", error); // Log the error
+    throw new Error("Error generating JWT");
+  }
 };
 
-export const loginUserController = async (req: Request, res: Response<ResponseResult<LoginResponseDto>>) => {
+// Controller function for logging in a user
+export const loginUserController = async (
+  req: Request,
+  res: Response<ResponseResult<any>> // Use 'any' if 'LoginResponseDto' is not defined or import it properly
+) => {
   try {
     const { email, password } = req.body;
 
@@ -32,8 +43,8 @@ export const loginUserController = async (req: Request, res: Response<ResponseRe
 
     // Check if user exists
     const user = await CddUser.findOne({ email });
-
     if (!user) {
+      console.log("User not found for email:", email); // Debugging
       return res.status(400).json({
         message: "Invalid email or password",
         status: 400,
@@ -41,37 +52,43 @@ export const loginUserController = async (req: Request, res: Response<ResponseRe
       });
     }
 
-    if (!user.isEnabled)
+    // Check if account is enabled
+    if (!user.isEnabled) {
       return res.status(304).json({
         success: false,
         status: 304,
         message: "Your account is currently disabled",
       });
+    }
 
-    // User exists, check if password is correct
+    // Check if password is correct
     const passwordIsCorrect = await bcrypt.compare(password, user.password);
-
     if (!passwordIsCorrect) {
+      console.log("Incorrect password for user:", email); // Debugging
       return res.status(400).json({
         message: "Invalid email or password",
         status: 400,
         success: false,
       });
     }
-    // Generate Token
-    const token = generateToken(user._id.toString(), user.role, user.email);
 
-    // Send HTTP-only cookie
+    // Generate JWT token for the user
+    const token = generateToken(user._id.toString(), user.role, user.email);
+    console.log("Generated token:", token); // Debugging
+
+    // Send JWT token as HTTP-only cookie
     res.cookie("token", token, {
       path: "/",
       httpOnly: true,
-      expires: new Date(Date.now() + 1000 * 86400), // 1 day
-      sameSite: "none",
-      secure: true,
+      expires: new Date(Date.now() + 1000 * 86400), // Token expires in 1 day
+      sameSite: "none", // Required for cross-origin cookies
+      secure: process.env.NODE_ENV === "production", // Set to true if using HTTPS in production
     });
 
-    // Return user data and token
-    const { firstName, lastName, phoneNumber } = user;
+    console.log("Token sent as cookie:", token); // Debugging
+
+    // Return user data (without country field) along with the token
+    const { firstName, lastName, phoneNumber, role } = user;
     return res.status(200).json({
       message: "User logged in successfully",
       status: 200,
@@ -81,11 +98,11 @@ export const loginUserController = async (req: Request, res: Response<ResponseRe
         lastName,
         email,
         phoneNumber,
-        role: user.role,
+        role,
       },
     });
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Login error:", error); // Log the error
     return res.status(500).json({
       message: "Error during login, please try again later",
       status: 500,

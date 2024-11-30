@@ -10,7 +10,6 @@ export type CddUserType = {
   role: Role;
   country: string;
   isEnabled: boolean;
-  isArchived: boolean;
 };
 
 const CddUserSchema = new mongoose.Schema<CddUserType>({
@@ -48,10 +47,7 @@ const CddUserSchema = new mongoose.Schema<CddUserType>({
     type: Boolean,
     default: true,
   },
-  isArchived: {
-    type: Boolean,
-    default: false,
-  },
+ 
 });
 
 export const CddUser = mongoose.model("CddUser", CddUserSchema);

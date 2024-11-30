@@ -11,8 +11,6 @@ import { verifyForgetPasswordLinkController } from "./useCases/forgetPassword/ve
 import { generateForgetPasswordLinkController } from "./useCases/forgetPassword/generateForgetPasswordLink.js";
 import { registerCddUserController } from "./useCases/registerCddUser/registerCddUser.js";
 
-
-
 export const userManagementRouter = express.Router();
 
 userManagementRouter.post("/register", registerCddUserController);
@@ -25,15 +23,9 @@ userManagementRouter.post("/forget-password/change-password", handleForgetPasswo
 
 userManagementRouter.get("/user-profile", verifyToken, getLoggedInUserController);
 
-
-
-
-
 userManagementRouter.put(
   "/handle-Account-Status",
   verifyToken,
   verifyRole(["DigitalTeam", "SuperAdmin"]),
   handleAccountStatusController
 );
-
-

@@ -8,7 +8,7 @@ export const verifyToken = (req: Request, res: Response<ResponseResult<null>>, n
 
   if (!token) {
     return res.status(401).json({
-      message: "you are not authenticated. Please login to continue.",
+      message: "You are not authenticated. Please login to continue.",
       status: 401,
       success: false,
     });
@@ -17,9 +17,10 @@ export const verifyToken = (req: Request, res: Response<ResponseResult<null>>, n
   let user;
   try {
     user = jwt.verify(token, process.env.JWT_SECRET as string) as JwtAuthPayload;
-  } catch {
+  } catch (error) {
+    console.error("JWT Verification Error:", error); // Log JWT verification errors
     return res.status(401).json({
-      message: "you are not authenticated. Please login to continue.",
+      message: "You are not authenticated. Please login to continue.",
       status: 401,
       success: false,
     });
@@ -27,11 +28,14 @@ export const verifyToken = (req: Request, res: Response<ResponseResult<null>>, n
 
   if (!user) {
     return res.status(401).json({
-      message: "you are not authenticated. Please login to continue.",
+      message: "You are not authenticated. Please login to continue.",
       status: 401,
       success: false,
     });
   }
+
+  // Log the user object
+  console.log("Authenticated User:", req.user); // Add this line to check the user details
 
   req.user = user;
   next();

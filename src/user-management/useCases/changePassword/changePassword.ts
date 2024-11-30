@@ -7,6 +7,8 @@ import { CddUser } from "../../../models/CddUser.js";
 export const changePasswordController = async (req: Request, res: Response<ResponseResult<null>>) => {
   const validation = changePasswordSchema.safeParse(req.body);
 
+  console.log("Validation result:", validation);  // Log the result of the schema validation
+
   if (!validation.success) {
     return res.status(400).json({
       message: validation.error.errors[0].message,
@@ -16,6 +18,9 @@ export const changePasswordController = async (req: Request, res: Response<Respo
   }
 
   try {
+    // Log the user ID from the JWT token
+    console.log("User ID:", req.user.id);
+
     const user = await CddUser.findById(req.user.id);
 
     if (!user) {
@@ -27,6 +32,7 @@ export const changePasswordController = async (req: Request, res: Response<Respo
     }
 
     const isPasswordMatch = await bcrypt.compare(req.body.oldPassword, user.password);
+    console.log("Password match result:", isPasswordMatch);  // Log the password match result
 
     if (!isPasswordMatch) {
       return res.status(400).json({
@@ -48,6 +54,9 @@ export const changePasswordController = async (req: Request, res: Response<Respo
 
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
+    // Log the new hashed password
+    console.log("Hashed password:", hashedPassword);
+
     user.password = hashedPassword;
     await user.save();
 
@@ -58,6 +67,7 @@ export const changePasswordController = async (req: Request, res: Response<Respo
       data: null,
     });
   } catch (error) {
+    console.error("Error in changePasswordController:", error);  // Log the full error
     return res.status(500).json({
       message: "Error occurred while handling the request, please try again later",
       success: false,
@@ -65,4 +75,3 @@ export const changePasswordController = async (req: Request, res: Response<Respo
     });
   }
 };
-

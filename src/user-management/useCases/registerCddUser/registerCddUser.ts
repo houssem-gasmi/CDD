@@ -1,19 +1,18 @@
 import * as bcrypt from "bcrypt";
 import { Request, Response } from "express";
-import { ResponseResult, Role, ResponseWithToken } from "../../../types/types.js";
-import { CddUser, CddUserType } from "../../../models/CddUser.js";
+import { ResponseResult, ResponseWithToken } from "../../../types/types.js";
+import { CddUser } from "../../../models/CddUser.js";
 import { sendMail } from "../../../services/mailingService.js";
 import { logger } from "../../../config/loggerSetup.js";
-import { RegisterToken } from "../../../models/registerTokenSchema.js";
 import validator from "validator";
 import jwt from "jsonwebtoken";  // Import jsonwebtoken to create a token
 
 export const registerCddUserController = async (
   req: Request,
-  res: Response<ResponseResult<ResponseWithToken>> // Use the new ResponseWithToken type
+  res: Response<ResponseResult<ResponseWithToken>> 
 ) => {
   try {
-    const { firstName, lastName, email, password, role, phoneNumber, country } = req.body;
+    const { firstName, lastName, email, password, phoneNumber, country } = req.body;
 
     // Validate request
     if (!email || !password) {
@@ -45,21 +44,28 @@ export const registerCddUserController = async (
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
+    // Create new user (default role is "Customer")
     const newUser = await CddUser.create({
       firstName,
       lastName,
       email,
       password: hashedPassword,
-      role,
+      role: "Customer", // Default role as "Customer"
       phoneNumber,
       country,
       isEnabled: true,
     });
 
+    // Log the new user creation
+    logger.info(`New user created: ${JSON.stringify(newUser)}`);
+
     // Send welcome email
-    await sendMail("Welcome to CDD", "Welcome to Customer Driven Domain", newUser.email);
-    logger.info("Welcome mail sent successfully");
+    try {
+      await sendMail("Welcome to CDD", "Welcome to Customer Driven Domain", newUser.email);
+      logger.info("Welcome mail sent successfully");
+    } catch (emailError) {
+      logger.error("Failed to send welcome email", emailError);
+    }
 
     // Create JWT token
     const token = jwt.sign(
@@ -68,9 +74,10 @@ export const registerCddUserController = async (
         email: newUser.email,
         role: newUser.role,
       },
-      process.env.JWT_SECRET as string,  // Use your JWT secret key
-      { expiresIn: "1h" }  // Set expiration time for the token (1 hour in this example)
+      process.env.JWT_SECRET as string, 
+      { expiresIn: "1d" } 
     );
+    logger.info("JWT Token generated: " + token);
 
     // Return user data with token
     res.status(200).json({
@@ -84,21 +91,21 @@ export const registerCddUserController = async (
         phoneNumber: newUser.phoneNumber,
         role: newUser.role,
         isEnabled: newUser.isEnabled,
-        isArchived: newUser.isArchived,
         country: newUser.country,
-        token,  // Send the generated token back to the user
+        token, // Send the generated token back to the user
       },
     });
-  } catch (error: unknown) { // Explicitly typing `error` as `unknown`
+  } catch (error: unknown) {
+    // Check if the error is an instance of Error
     if (error instanceof Error) {
-      // Now TypeScript knows `error` is an instance of `Error`
       logger.error("Error during registration:", error.message, { error });
     } else {
-      // Handle the case where the error is not of type `Error`
       logger.error("Unknown error during registration", { error });
     }
+
+    // Respond with a generic error message
     res.status(500).json({
-      message: "Error during registration, please try again later",
+      message: "An error occurred while processing your request. Please try again later.",
       status: 500,
       success: false,
     });
