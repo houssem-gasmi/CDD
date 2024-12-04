@@ -1,4 +1,4 @@
-CDD - Customer Driven Domain
+
 CDD (Customer Driven Domain) is a comprehensive backend system designed to cater to customer-centric services. It focuses on managing users, handling authentication, managing account statuses, and facilitating password resets. The application is designed to be scalable, secure, and efficient for handling user data and interactions.
 
 Tech Stack
